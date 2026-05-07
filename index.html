@@ -1,11 +1,776 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tg">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CV Builder — Тоҷикӣ</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root {
+  --bg: #0e0e0e;
+  --surface: #161616;
+  --card: #1e1e1e;
+  --border: #2a2a2a;
+  --accent: #c8a96e;
+  --accent2: #e8c99e;
+  --text: #f0ede8;
+  --muted: #777;
+  --danger: #e05555;
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow-x: hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  padding-bottom: 90px;
+}
+
+/* HEADER */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.app-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--accent);
+}
+.preview-btn {
+  background: rgba(200,169,110,0.15);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 7px 14px;
+  color: var(--accent);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 57px;
+  z-index: 199;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 13px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* FORM */
+.form-panel { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: var(--accent);
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.field-group { margin-bottom: 16px; }
+.field-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 7px;
+}
+.field-group input,
+.field-group textarea {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 15px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+  -webkit-appearance: none;
+}
+.field-group input:focus,
+.field-group textarea:focus { border-color: var(--accent); }
+.field-group textarea { min-height: 90px; }
+
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* PHOTO */
+.photo-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.photo-circle {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: 2px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+.photo-info { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.photo-info strong { color: var(--text); display: block; font-size: 14px; }
+.photo-remove { color: var(--danger); font-size: 12px; cursor: pointer; }
+
+/* DYNAMIC ITEMS */
+.dynamic-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.item-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.remove-btn {
+  background: rgba(224,85,85,0.1);
+  border: 1px solid rgba(224,85,85,0.3);
+  border-radius: 8px;
+  color: var(--danger);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.add-btn {
+  width: 100%;
+  background: transparent;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  color: var(--accent);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+/* SKILLS */
+.skills-input-row { display: flex; gap: 8px; }
+.skills-input-row input { flex: 1; }
+.skills-input-row button {
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  width: 48px;
+  color: #000;
+  font-weight: 700;
+  font-size: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.skills-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.skill-tag {
+  background: rgba(200,169,110,0.12);
+  border: 1px solid rgba(200,169,110,0.3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--accent2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.skill-tag .x { cursor: pointer; color: var(--danger); font-size: 16px; line-height: 1; }
+
+/* TEMPLATE GRID */
+.template-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+.template-card {
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.template-card.active { border-color: var(--accent); background: rgba(200,169,110,0.07); }
+.t-preview { height: 52px; border-radius: 6px; margin-bottom: 7px; }
+.t-name { font-size: 12px; color: var(--muted); font-weight: 600; }
+.template-card.active .t-name { color: var(--accent); }
+
+/* BOTTOM ACTIONS */
+.bottom-actions {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  z-index: 200;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+.btn-pdf {
+  flex: 1;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-preview-bottom {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px 16px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* PREVIEW MODAL */
+.preview-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #111;
+  flex-direction: column;
+}
+.preview-modal.show { display: flex; }
+.preview-modal-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.preview-modal-header span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.close-preview {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 14px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.preview-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.cv-paper {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  overflow: hidden;
+  color: #222;
+  font-size: 11px;
+}
+
+/* LOADING */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+.loading-overlay.show { display: flex; }
+.spinner {
+  width: 44px; height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: var(--accent); font-size: 15px; }
+
+/* ===== CV TEMPLATES ===== */
+
+/* CLASSIC */
+.cv-classic .cv-header { background: #1a2332; color: #fff; padding: 20px 18px; display: flex; gap: 12px; align-items: center; }
+.cv-classic .cv-photo { width: 58px; height: 58px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); object-fit: cover; flex-shrink: 0; }
+.cv-classic .cv-photo-ph { width: 58px; height: 58px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.6); flex-shrink: 0; }
+.cv-classic .cv-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+.cv-classic .cv-jobtitle { font-size: 10px; opacity: 0.7; margin-bottom: 5px; }
+.cv-classic .cv-contacts { display: flex; flex-wrap: wrap; gap: 3px 8px; font-size: 9px; opacity: 0.85; }
+.cv-classic .cv-body { display: grid; grid-template-columns: 1fr 2fr; }
+.cv-classic .cv-sidebar { background: #f4f4f4; padding: 14px 12px; }
+.cv-classic .cv-main { padding: 14px 12px; }
+.cv-classic .cv-section { margin-bottom: 14px; }
+.cv-classic .cv-stitle { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #1a2332; margin-bottom: 7px; padding-bottom: 4px; border-bottom: 1.5px solid #1a2332; }
+.cv-classic .cv-item { margin-bottom: 9px; }
+.cv-classic .cv-ititle { font-weight: 700; font-size: 10px; }
+.cv-classic .cv-isub { font-size: 9px; color: #666; margin: 1px 0; }
+.cv-classic .cv-idesc { font-size: 9px; color: #444; line-height: 1.5; }
+.cv-classic .cv-tag { display: inline-block; background: #e0e0e0; border-radius: 3px; padding: 1px 5px; font-size: 9px; margin: 1px; color: #333; }
+
+/* MODERN */
+.cv-modern .cv-header { background: linear-gradient(135deg, #c8a96e, #8b6914); padding: 20px 18px; display: flex; align-items: center; gap: 12px; }
+.cv-modern .cv-photo { width: 58px; height: 58px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.4); object-fit: cover; flex-shrink: 0; }
+.cv-modern .cv-photo-ph { width: 58px; height: 58px; border-radius: 10px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.cv-modern .cv-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 2px; }
+.cv-modern .cv-jobtitle { color: rgba(255,255,255,0.85); font-size: 10px; margin-bottom: 5px; }
+.cv-modern .cv-contacts { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 9px; color: rgba(255,255,255,0.9); }
+.cv-modern .cv-body { padding: 16px 16px; }
+.cv-modern .cv-section { margin-bottom: 14px; }
+.cv-modern .cv-stitle { font-size: 9px; font-weight: 700; color: #8b6914; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #e0d0b0; }
+.cv-modern .cv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cv-modern .cv-item { background: #faf8f3; border-left: 2px solid #c8a96e; padding: 7px 9px; border-radius: 0 4px 4px 0; margin-bottom: 7px; }
+.cv-modern .cv-ititle { font-weight: 700; font-size: 10px; }
+.cv-modern .cv-isub { font-size: 9px; color: #888; margin: 1px 0; }
+.cv-modern .cv-idesc { font-size: 9px; color: #555; line-height: 1.5; }
+.cv-modern .cv-tag { display: inline-block; background: #f0e8d4; border: 1px solid #d4b878; border-radius: 20px; padding: 1px 7px; font-size: 9px; margin: 1px; color: #7a5c10; }
+.cv-modern .about-text { font-size: 10px; color: #444; line-height: 1.7; }
+
+/* MINIMAL */
+.cv-minimal .cv-header { padding: 20px 18px 14px; border-bottom: 2px solid #000; }
+.cv-minimal .cv-header-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 8px; }
+.cv-minimal .cv-photo { width: 56px; height: 56px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+.cv-minimal .cv-photo-ph { width: 56px; height: 56px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #999; border-radius: 4px; flex-shrink: 0; }
+.cv-minimal .cv-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: #000; }
+.cv-minimal .cv-jobtitle { font-size: 10px; color: #666; margin-top: 2px; }
+.cv-minimal .cv-contacts { display: flex; flex-wrap: wrap; gap: 3px 12px; font-size: 9px; color: #555; }
+.cv-minimal .cv-body { display: grid; grid-template-columns: 2fr 1fr; }
+.cv-minimal .cv-main { padding: 14px 14px; border-right: 1px solid #eee; }
+.cv-minimal .cv-sidebar { padding: 14px 10px; background: #fafafa; }
+.cv-minimal .cv-section { margin-bottom: 14px; }
+.cv-minimal .cv-stitle { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 8px; }
+.cv-minimal .cv-item { margin-bottom: 10px; }
+.cv-minimal .cv-ititle { font-weight: 600; font-size: 10px; }
+.cv-minimal .cv-isub { font-size: 9px; color: #888; margin: 1px 0; }
+.cv-minimal .cv-idesc { font-size: 9px; color: #555; line-height: 1.6; }
+.cv-minimal .cv-tag { display: block; font-size: 10px; color: #444; padding: 3px 0; border-bottom: 1px solid #eee; }
+.cv-minimal .about-text { font-size: 9px; color: #444; line-height: 1.7; }
+</style>
 </head>
 <body>
 
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">PDF тайёр мешавад...</div>
+</div>
+
+<div class="app-header">
+  <h1>CV Builder</h1>
+  <button class="preview-btn" onclick="openPreview()">👁 Пешнамоиш</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('info')">👤 Маълумот</div>
+  <div class="tab" onclick="switchTab('experience')">💼 Таҷриба</div>
+  <div class="tab" onclick="switchTab('education')">🎓 Таҳсил</div>
+  <div class="tab" onclick="switchTab('skills')">⚡ Малака</div>
+  <div class="tab" onclick="switchTab('design')">🎨 Шаблон</div>
+</div>
+
+<div class="form-panel">
+
+  <div class="tab-panel active" id="tab-info">
+    <p class="section-title">Маълумоти шахсӣ</p>
+    <div class="photo-upload">
+      <div class="photo-circle" onclick="document.getElementById('photoInput').click()">
+        <img id="photoPreview" src="" alt="" style="display:none">
+        <svg id="photoIcon" width="28" height="28" fill="none" stroke="#666" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="photo-info">
+        <strong>Акс илова кунед</strong>
+        JPG ё PNG формат<br>
+        <span class="photo-remove" onclick="removePhoto()">✕ Нест кардан</span>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+    </div>
+    <div class="row-2">
+      <div class="field-group"><label>Ном</label><input type="text" id="firstName" placeholder="Амин"></div>
+      <div class="field-group"><label>Насаб</label><input type="text" id="lastName" placeholder="Донаев"></div>
+    </div>
+    <div class="field-group"><label>Касб / Унвон</label><input type="text" id="jobTitle" placeholder="Full-Stack Developer"></div>
+    <div class="field-group"><label>Дар бораи ман</label><textarea id="about" placeholder="Ба мухтасар дар бораи худ нависед..."></textarea></div>
+    <div class="row-2">
+      <div class="field-group"><label>Телефон</label><input type="tel" id="phone" placeholder="+992 XX XXX XXXX"></div>
+      <div class="field-group"><label>Email</label><input type="email" id="email" placeholder="amin@mail.com"></div>
+    </div>
+    <div class="row-2">
+      <div class="field-group"><label>Шаҳр</label><input type="text" id="city" placeholder="Душанбе"></div>
+      <div class="field-group"><label>Вебсайт / GitHub</label><input type="text" id="website" placeholder="github.com/user"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-experience">
+    <p class="section-title">Таҷрибаи корӣ</p>
+    <div id="expList"></div>
+    <button class="add-btn" onclick="addExp()">+ Таҷриба илова кунед</button>
+  </div>
+
+  <div class="tab-panel" id="tab-education">
+    <p class="section-title">Таҳсил</p>
+    <div id="eduList"></div>
+    <button class="add-btn" onclick="addEdu()">+ Таҳсил илова кунед</button>
+  </div>
+
+  <div class="tab-panel" id="tab-skills">
+    <p class="section-title">Малака ва кӯшишҳо</p>
+    <div class="field-group">
+      <label>Малакаҳо</label>
+      <div class="skills-input-row">
+        <input type="text" id="skillInput" placeholder="Python, Photoshop, Excel..." onkeydown="if(event.key==='Enter'){addSkill();event.preventDefault()}">
+        <button onclick="addSkill()">+</button>
+      </div>
+      <div class="skills-tags" id="skillTags"></div>
+    </div>
+    <div class="field-group" style="margin-top:20px">
+      <label>Забонҳо</label>
+      <div class="skills-input-row">
+        <input type="text" id="langInput" placeholder="Тоҷикӣ — С1, Русӣ — В2..." onkeydown="if(event.key==='Enter'){addLang();event.preventDefault()}">
+        <button onclick="addLang()">+</button>
+      </div>
+      <div class="skills-tags" id="langTags"></div>
+    </div>
+    <div class="field-group" style="margin-top:20px">
+      <label>Сертификатҳо ва дастовардҳо</label>
+      <textarea id="certs" placeholder="Google Certificate 2024, Winner Hackathon 2023..."></textarea>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-design">
+    <p class="section-title">Шаблони CV</p>
+    <div class="template-grid">
+      <div class="template-card active" onclick="setTemplate('classic')" id="tpl-classic">
+        <div class="t-preview" style="background:linear-gradient(135deg,#1a2332,#2d3f5e)"></div>
+        <div class="t-name">Classic</div>
+      </div>
+      <div class="template-card" onclick="setTemplate('modern')" id="tpl-modern">
+        <div class="t-preview" style="background:linear-gradient(135deg,#c8a96e,#8b6914)"></div>
+        <div class="t-name">Modern</div>
+      </div>
+      <div class="template-card" onclick="setTemplate('minimal')" id="tpl-minimal">
+        <div class="t-preview" style="background:#f8f8f8;border:1px solid #ddd"></div>
+        <div class="t-name">Minimal</div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7">Шаблонро интихоб кунед ва "Пешнамоиш"-ро клик кунед.</p>
+  </div>
+
+</div>
+
+<div class="bottom-actions">
+  <button class="btn-preview-bottom" onclick="openPreview()">👁 Намоиш</button>
+  <button class="btn-pdf" onclick="downloadPDF()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    PDF Дониёд
+  </button>
+</div>
+
+<!-- Preview Modal -->
+<div class="preview-modal" id="previewModal">
+  <div class="preview-modal-header">
+    <span>📄 Пешнамоиши CV</span>
+    <button class="close-preview" onclick="closePreview()">✕ Бастан</button>
+  </div>
+  <div class="preview-scroll">
+    <div id="cvPaper" class="cv-paper cv-classic"></div>
+  </div>
+</div>
+
+<script>
+let state = {
+  template: 'classic',
+  photo: null,
+  experiences: [],
+  educations: [],
+  skills: [],
+  languages: []
+};
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const tabs = ['info','experience','education','skills','design'];
+  document.querySelectorAll('.tab')[tabs.indexOf(name)].classList.add('active');
+}
+
+function openPreview() {
+  buildCV();
+  document.getElementById('previewModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closePreview() {
+  document.getElementById('previewModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    state.photo = ev.target.result;
+    document.getElementById('photoPreview').src = state.photo;
+    document.getElementById('photoPreview').style.display = 'block';
+    document.getElementById('photoIcon').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+function removePhoto() {
+  state.photo = null;
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoIcon').style.display = 'block';
+  document.getElementById('photoInput').value = '';
+}
+
+function addExp() {
+  state.experiences.push({ id: Date.now(), company:'', position:'', period:'', desc:'' });
+  renderExpList();
+}
+function removeExp(id) {
+  state.experiences = state.experiences.filter(e => e.id !== id);
+  renderExpList();
+}
+function renderExpList() {
+  document.getElementById('expList').innerHTML = state.experiences.map((exp, i) => `
+    <div class="dynamic-item">
+      <div class="item-header">
+        <span class="item-num">Таҷриба ${i+1}</span>
+        <button class="remove-btn" onclick="removeExp(${exp.id})">✕ Нест</button>
+      </div>
+      <div class="field-group"><label>Ширкат</label><input type="text" value="${exp.company}" placeholder="Google, Startup..." oninput="updateExp(${exp.id},'company',this.value)"></div>
+      <div class="row-2">
+        <div class="field-group"><label>Вазифа</label><input type="text" value="${exp.position}" placeholder="Developer" oninput="updateExp(${exp.id},'position',this.value)"></div>
+        <div class="field-group"><label>Давра</label><input type="text" value="${exp.period}" placeholder="2022—2024" oninput="updateExp(${exp.id},'period',this.value)"></div>
+      </div>
+      <div class="field-group"><label>Тавсиф</label><textarea placeholder="Чӣ кор кардед..." oninput="updateExp(${exp.id},'desc',this.value)">${exp.desc}</textarea></div>
+    </div>
+  `).join('');
+}
+function updateExp(id, f, v) { const e = state.experiences.find(e=>e.id===id); if(e) e[f]=v; }
+
+function addEdu() {
+  state.educations.push({ id: Date.now(), school:'', degree:'', period:'', desc:'' });
+  renderEduList();
+}
+function removeEdu(id) {
+  state.educations = state.educations.filter(e => e.id !== id);
+  renderEduList();
+}
+function renderEduList() {
+  document.getElementById('eduList').innerHTML = state.educations.map((edu, i) => `
+    <div class="dynamic-item">
+      <div class="item-header">
+        <span class="item-num">Таҳсил ${i+1}</span>
+        <button class="remove-btn" onclick="removeEdu(${edu.id})">✕ Нест</button>
+      </div>
+      <div class="field-group"><label>Муассиса</label><input type="text" value="${edu.school}" placeholder="ДМТ, РТСУ..." oninput="updateEdu(${edu.id},'school',this.value)"></div>
+      <div class="row-2">
+        <div class="field-group"><label>Ихтисос</label><input type="text" value="${edu.degree}" placeholder="Информатика" oninput="updateEdu(${edu.id},'degree',this.value)"></div>
+        <div class="field-group"><label>Солҳо</label><input type="text" value="${edu.period}" placeholder="2020—2024" oninput="updateEdu(${edu.id},'period',this.value)"></div>
+      </div>
+      <div class="field-group"><label>Тавсиф (ихтиёрӣ)</label><textarea placeholder="Дипломи аъло..." oninput="updateEdu(${edu.id},'desc',this.value)">${edu.desc}</textarea></div>
+    </div>
+  `).join('');
+}
+function updateEdu(id, f, v) { const e = state.educations.find(e=>e.id===id); if(e) e[f]=v; }
+
+function addSkill() {
+  const inp = document.getElementById('skillInput');
+  const v = inp.value.trim(); if(!v) return;
+  state.skills.push(v); inp.value=''; renderSkillTags();
+}
+function removeSkill(i) { state.skills.splice(i,1); renderSkillTags(); }
+function renderSkillTags() {
+  document.getElementById('skillTags').innerHTML = state.skills.map((s,i)=>
+    `<div class="skill-tag">${s}<span class="x" onclick="removeSkill(${i})">×</span></div>`).join('');
+}
+function addLang() {
+  const inp = document.getElementById('langInput');
+  const v = inp.value.trim(); if(!v) return;
+  state.languages.push(v); inp.value=''; renderLangTags();
+}
+function removeLang(i) { state.languages.splice(i,1); renderLangTags(); }
+function renderLangTags() {
+  document.getElementById('langTags').innerHTML = state.languages.map((s,i)=>
+    `<div class="skill-tag">${s}<span class="x" onclick="removeLang(${i})">×</span></div>`).join('');
+}
+
+function setTemplate(name) {
+  state.template = name;
+  document.querySelectorAll('.template-card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tpl-'+name).classList.add('active');
+}
+
+function getData() {
+  return {
+    firstName: document.getElementById('firstName').value||'',
+    lastName: document.getElementById('lastName').value||'',
+    jobTitle: document.getElementById('jobTitle').value||'',
+    about: document.getElementById('about').value||'',
+    phone: document.getElementById('phone').value||'',
+    email: document.getElementById('email').value||'',
+    city: document.getElementById('city').value||'',
+    website: document.getElementById('website').value||'',
+    certs: document.getElementById('certs').value||'',
+  };
+}
+function initials(d) { return ((d.firstName[0]||'')+(d.lastName[0]||'')).toUpperCase()||'?'; }
+
+function renderClassic(d) {
+  const c = [d.phone,d.email,d.city,d.website].filter(Boolean);
+  const ph = state.photo?`<img class="cv-photo" src="${state.photo}" alt="">`:`<div class="cv-photo-ph">${initials(d)}</div>`;
+  return `<div class="cv-header">${ph}<div><div class="cv-name">${d.firstName} ${d.lastName}</div><div class="cv-jobtitle">${d.jobTitle}</div><div class="cv-contacts">${c.map(x=>`<span>· ${x}</span>`).join('')}</div></div></div>
+  <div class="cv-body"><div class="cv-sidebar">
+    ${d.about?`<div class="cv-section"><div class="cv-stitle">Профил</div><div class="cv-idesc">${d.about}</div></div>`:''}
+    ${state.skills.length?`<div class="cv-section"><div class="cv-stitle">Малака</div>${state.skills.map(s=>`<span class="cv-tag">${s}</span>`).join('')}</div>`:''}
+    ${state.languages.length?`<div class="cv-section"><div class="cv-stitle">Забон</div>${state.languages.map(s=>`<div class="cv-idesc">• ${s}</div>`).join('')}</div>`:''}
+    ${d.certs?`<div class="cv-section"><div class="cv-stitle">Сертификат</div><div class="cv-idesc">${d.certs}</div></div>`:''}
+  </div><div class="cv-main">
+    ${state.experiences.length?`<div class="cv-section"><div class="cv-stitle">Таҷриба</div>${state.experiences.map(e=>`<div class="cv-item"><div class="cv-ititle">${e.position}</div><div class="cv-isub">${e.company}${e.period?' | '+e.period:''}</div>${e.desc?`<div class="cv-idesc">${e.desc}</div>`:''}</div>`).join('')}</div>`:''}
+    ${state.educations.length?`<div class="cv-section"><div class="cv-stitle">Таҳсил</div>${state.educations.map(e=>`<div class="cv-item"><div class="cv-ititle">${e.degree}</div><div class="cv-isub">${e.school}${e.period?' | '+e.period:''}</div></div>`).join('')}</div>`:''}
+  </div></div>`;
+}
+
+function renderModern(d) {
+  const c = [d.phone,d.email,d.city,d.website].filter(Boolean);
+  const ph = state.photo?`<img class="cv-photo" src="${state.photo}" alt="">`:`<div class="cv-photo-ph">${initials(d)}</div>`;
+  return `<div class="cv-header">${ph}<div><div class="cv-name">${d.firstName} ${d.lastName}</div><div class="cv-jobtitle">${d.jobTitle}</div><div class="cv-contacts">${c.join(' · ')}</div></div></div>
+  <div class="cv-body">
+    ${d.about?`<div class="cv-section"><div class="cv-stitle">Дар бораи ман</div><div class="about-text">${d.about}</div></div>`:''}
+    ${state.experiences.length?`<div class="cv-section"><div class="cv-stitle">Таҷриба</div>${state.experiences.map(e=>`<div class="cv-item"><div class="cv-ititle">${e.position}</div><div class="cv-isub">${e.company}${e.period?' — '+e.period:''}</div>${e.desc?`<div class="cv-idesc">${e.desc}</div>`:''}</div>`).join('')}</div>`:''}
+    ${state.educations.length?`<div class="cv-section"><div class="cv-stitle">Таҳсил</div>${state.educations.map(e=>`<div class="cv-item"><div class="cv-ititle">${e.degree}</div><div class="cv-isub">${e.school}${e.period?' — '+e.period:''}</div></div>`).join('')}</div>`:''}
+    <div class="cv-row">
+      <div>${state.skills.length?`<div class="cv-stitle">Малака</div>${state.skills.map(s=>`<span class="cv-tag">${s}</span>`).join('')}`:''}</div>
+      <div>${state.languages.length?`<div class="cv-stitle">Забон</div>${state.languages.map(s=>`<span class="cv-tag">${s}</span>`).join('')}`:''}${d.certs?`<div style="margin-top:8px"><div class="cv-stitle">Сертификат</div><div class="about-text">${d.certs}</div></div>`:''}</div>
+    </div>
+  </div>`;
+}
+
+function renderMinimal(d) {
+  const c = [d.phone,d.email,d.city,d.website].filter(Boolean);
+  const ph = state.photo?`<img class="cv-photo" src="${state.photo}" alt="">`:`<div class="cv-photo-ph">${initials(d)}</div>`;
+  return `<div class="cv-header"><div class="cv-header-top">${ph}<div><div class="cv-name">${d.firstName} ${d.lastName}</div><div class="cv-jobtitle">${d.jobTitle}</div></div></div><div class="cv-contacts">${c.join(' · ')}</div></div>
+  <div class="cv-body"><div class="cv-main">
+    ${d.about?`<div class="cv-section"><div class="cv-stitle">Профил</div><div class="about-text">${d.about}</div></div>`:''}
+    ${state.experiences.length?`<div class="cv-section"><div class="cv-stitle">Таҷриба</div>${state.experiences.map(e=>`<div class="cv-item"><div class="cv-ititle">${e.position}</div><div class="cv-isub">${e.company} · ${e.period}</div>${e.desc?`<div class="cv-idesc">${e.desc}</div>`:''}</div>`).join('')}</div>`:''}
+    ${state.educations.length?`<div class="cv-section"><div class="cv-stitle">Таҳсил</div>${state.educations.map(e=>`<div class="cv-item"><div class="cv-ititle">${e.degree}</div><div class="cv-isub">${e.school} · ${e.period}</div></div>`).join('')}</div>`:''}
+  </div><div class="cv-sidebar">
+    ${state.skills.length?`<div class="cv-section"><div class="cv-stitle">Малака</div>${state.skills.map(s=>`<span class="cv-tag">${s}</span>`).join('')}</div>`:''}
+    ${state.languages.length?`<div class="cv-section"><div class="cv-stitle">Забон</div>${state.languages.map(s=>`<span class="cv-tag">${s}</span>`).join('')}</div>`:''}
+    ${d.certs?`<div class="cv-section"><div class="cv-stitle">Сертификат</div><div class="about-text">${d.certs}</div></div>`:''}
+  </div></div>`;
+}
+
+function buildCV() {
+  const d = getData();
+  const paper = document.getElementById('cvPaper');
+  paper.className = 'cv-paper cv-' + state.template;
+  if (state.template==='classic') paper.innerHTML = renderClassic(d);
+  else if (state.template==='modern') paper.innerHTML = renderModern(d);
+  else paper.innerHTML = renderMinimal(d);
+}
+
+function downloadPDF() {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.classList.add('show');
+  const d = getData();
+  const name = (d.firstName+'_'+d.lastName).replace(/\s+/g,'_')||'CV';
+  const temp = document.createElement('div');
+  temp.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff';
+  const paper = document.createElement('div');
+  paper.className = 'cv-paper cv-' + state.template;
+  paper.style.cssText = 'width:794px;max-width:794px;border-radius:0;box-shadow:none;font-size:12px';
+  if (state.template==='classic') paper.innerHTML = renderClassic(d);
+  else if (state.template==='modern') paper.innerHTML = renderModern(d);
+  else paper.innerHTML = renderMinimal(d);
+  temp.appendChild(paper);
+  document.body.appendChild(temp);
+  setTimeout(()=>{
+    html2pdf().set({
+      margin:0,
+      filename: name+'_CV.pdf',
+      image:{type:'jpeg',quality:0.97},
+      html2canvas:{scale:2,useCORS:true},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+    }).from(paper).save().then(()=>{
+      document.body.removeChild(temp);
+      overlay.classList.remove('show');
+    }).catch(()=>{
+      document.body.removeChild(temp);
+      overlay.classList.remove('show');
+    });
+  },300);
+}
+</script>
 </body>
 </html>
